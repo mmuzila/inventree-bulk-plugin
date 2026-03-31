@@ -5,6 +5,7 @@ import json
 from dataclasses import dataclass
 from typing import Any, Callable, Generic, Literal, Optional, TypeVar, Union
 from pathlib import Path
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import Model
 from django.apps import apps
@@ -19,15 +20,13 @@ from stock.models import StockLocation
 from part.models import (
     PartCategory,
     Part,
-    PartParameter,
-    PartParameterTemplate,
     PartCategoryParameterTemplate,
     PartRelated,
 )
 from company.models import Company, ManufacturerPart, SupplierPart
 from stock.models import StockItem
-from common.models import InvenTreeSetting
-from InvenTree.status_codes import StockStatus
+from common.models import InvenTreeSetting, Parameter, ParameterTemplate
+from stock.status_codes import StockStatus
 from InvenTree.helpers_model import download_image_from_url
 from plugin import registry
 
@@ -371,7 +370,7 @@ class PartBulkCreateObject(BulkCreateObject[Part]):
                         "template": FieldDefinition(
                             "Template",
                             field_type="model",
-                            model="part.PartParameterTemplate",
+                            model="common.parametertemplate",
                             required=True,
                         ),
                         "value": FieldDefinition("Value", required=True),
@@ -648,12 +647,13 @@ class PartBulkCreateObject(BulkCreateObject[Part]):
         if parent:
             part.copy_parameters_from(parent)
 
+        content_type = ContentType.objects.get_for_model(Part)
         for parameter in parameters:
             template = get_model_instance(
-                PartParameterTemplate, parameter["template"], {}, f"for {part.name}"
+                ParameterTemplate, parameter["template"], {}, f"for {part.name}"
             )
-            PartParameter.objects.create(
-                part=part, template=template, data=parameter["value"]
+            Parameter.objects.create(
+                model_type=content_type, model_id=part.pk, template=template, data=parameter["value"]
             )
 
         # create attachments
@@ -792,7 +792,7 @@ class PartBulkCreateObject(BulkCreateObject[Part]):
                     return [{"template": "", "value": ""}]
 
                 return [
-                    {"template": str(c.parameter_template.id), "value": c.default_value}
+                    {"template": str(c.template.id), "value": c.default_value}
                     for c in parameters
                 ]
             except Exception:  # pragma: no cover

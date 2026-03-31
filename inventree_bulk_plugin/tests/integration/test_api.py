@@ -5,8 +5,8 @@ from django.urls import reverse
 
 from InvenTree.unit_test import InvenTreeAPITestCase
 from stock.models import StockLocation
-from part.models import PartCategory, PartParameterTemplate, PartCategoryParameterTemplate
-from common.models import InvenTreeSetting
+from part.models import PartCategory, PartCategoryParameterTemplate
+from common.models import InvenTreeSetting, ParameterTemplate
 
 from ...models import BulkCreationTemplate
 
@@ -107,11 +107,11 @@ class InvenTreeBulkPluginAPITestCase(InvenTreeAPITestCase):
         ])
 
         # detail with parent id set and with defined part category parameter templates
-        part_parameter_template1 = PartParameterTemplate.objects.create(name="Length", units="m")
-        part_parameter_template2 = PartParameterTemplate.objects.create(name="Weight per meter", units="kg/m")
-        PartCategoryParameterTemplate.objects.create(category=category, parameter_template=part_parameter_template1)
+        part_parameter_template1 = ParameterTemplate.objects.create(name="Length", units="m")
+        part_parameter_template2 = ParameterTemplate.objects.create(name="Weight per meter", units="kg/m")
+        PartCategoryParameterTemplate.objects.create(category=category, template=part_parameter_template1)
         PartCategoryParameterTemplate.objects.create(
-            category=category, parameter_template=part_parameter_template2, default_value="10")
+            category=category, template=part_parameter_template2, default_value="10")
 
         response = self.get(url + f"?template_type=PART&parent_id={category.pk}", expected_code=200).json()
         self.assertEqual(response["fields"]["parameters"]["default"], [

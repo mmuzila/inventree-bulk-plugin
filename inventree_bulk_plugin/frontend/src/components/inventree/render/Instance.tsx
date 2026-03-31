@@ -77,7 +77,7 @@ const RendererLookup: EnumDictionary<
   [ModelType.owner]: RenderOwner,
   [ModelType.part]: RenderPart,
   [ModelType.partcategory]: RenderPartCategory,
-  [ModelType.partparametertemplate]: RenderPartParameterTemplate,
+  [ModelType.parametertemplate]: RenderPartParameterTemplate,
   [ModelType.parttesttemplate]: RenderPartTestTemplate,
   [ModelType.projectcode]: RenderProjectCode,
   [ModelType.purchaseorder]: RenderPurchaseOrder,
