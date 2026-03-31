@@ -19,8 +19,8 @@ from stock.models import StockLocation
 from part.models import (
     PartCategory,
     Part,
-    PartParameter,
-    PartParameterTemplate,
+    Parameter,
+    ParameterTemplate,
     PartCategoryParameterTemplate,
     PartRelated,
 )
@@ -371,7 +371,7 @@ class PartBulkCreateObject(BulkCreateObject[Part]):
                         "template": FieldDefinition(
                             "Template",
                             field_type="model",
-                            model="part.PartParameterTemplate",
+                            model="part.ParameterTemplate",
                             required=True,
                         ),
                         "value": FieldDefinition("Value", required=True),
@@ -650,9 +650,9 @@ class PartBulkCreateObject(BulkCreateObject[Part]):
 
         for parameter in parameters:
             template = get_model_instance(
-                PartParameterTemplate, parameter["template"], {}, f"for {part.name}"
+                ParameterTemplate, parameter["template"], {}, f"for {part.name}"
             )
-            PartParameter.objects.create(
+            Parameter.objects.create(
                 part=part, template=template, data=parameter["value"]
             )
 
